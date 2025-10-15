@@ -1,9 +1,14 @@
 package cmd
 
 import (
+	"JWTechniques/attacks"
 	"fmt"
 
 	"github.com/spf13/cobra"
+)
+
+var (
+	jwtStr string
 )
 
 // magicCmd represents the magic command
@@ -17,20 +22,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("magic called")
+		if jwtStr != "" {
+			attacks.MainMagic(jwtStr)
+		} else {
+			fmt.Print("A token must be given with the \"--token\" (or\"-t\") flag")
+		}
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(magicCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// magicCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// magicCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	magicCmd.Flags().StringVarP(&jwtStr, "token", "t", "", "The token that must be analyzed")
 }

