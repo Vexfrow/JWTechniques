@@ -65,8 +65,6 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 	//Create a new token with the same values + the value that has been modified
 	newJWT := jwt.NewWithClaims(signMethod, newJWTClaims)
 
-	PrintToken(newJWT)
-
 	return newJWT, nil
 }
 

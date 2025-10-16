@@ -8,7 +8,9 @@ import (
 )
 
 var (
-	jwtStr string
+	jwtStr     string
+	userHeader string
+	userValue  string
 )
 
 // magicCmd represents the magic command
@@ -23,7 +25,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if jwtStr != "" {
-			attacks.MainMagic(jwtStr)
+			attacks.MainMagic(jwtStr, userHeader, userValue)
 		} else {
 			fmt.Print("A token must be given with the \"--token\" (or\"-t\") flag")
 		}
@@ -35,4 +37,6 @@ func init() {
 	rootCmd.AddCommand(magicCmd)
 
 	magicCmd.Flags().StringVarP(&jwtStr, "token", "t", "", "The token that must be analyzed")
+	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "u", "username", "The name of the field containing the username")
+	magicCmd.Flags().StringVarP(&userValue, "userValue", "v", "admin", "The name that should replaced the current username")
 }
