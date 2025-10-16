@@ -3,6 +3,8 @@ package attacks
 import (
 	"JWTechniques/ctrl"
 	"fmt"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func MainMagic(jwtStr string, userHeader string, userValue string) {
@@ -12,6 +14,20 @@ func MainMagic(jwtStr string, userHeader string, userValue string) {
 	if token == nil {
 		fmt.Print("Error : Unable to parse the JWT\n")
 		return
+	}
+
+	if userHeader == "" {
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+
+			if _, ok := claims["user"]; ok {
+				userHeader = "user"
+			} else if _, ok := claims["username"]; ok {
+				userHeader = "username"
+			} else {
+				fmt.Print("The name of the \"user\" header is unknown\nThe tool will only generate tokens without modifying the \"user\" header\n\n")
+				fmt.Print("------------------------------------------------------\n\n")
+			}
+		}
 	}
 
 	//It should always contains the "alg" header, but we check nevertheless

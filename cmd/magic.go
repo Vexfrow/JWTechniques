@@ -38,6 +38,6 @@ func init() {
 	rootCmd.AddCommand(magicCmd)
 
 	magicCmd.Flags().StringVarP(&jwtStr, "token", "t", "", "The token that must be analyzed")
-	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "u", "username", "The name of the field containing the username")
+	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "u", "", "The name of the field containing the username. If no value is given, the tool will check for \"username\" and \"user\" fields")
 	magicCmd.Flags().StringVarP(&userValue, "userValue", "v", "admin", "The name that should replaced the current username")
 }

