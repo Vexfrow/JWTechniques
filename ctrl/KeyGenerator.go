@@ -1,5 +1,6 @@
 package ctrl
 
-func GenerateJWK() {
+func GenerateJWK(algorithm string) string {
 
+	return ""
 }

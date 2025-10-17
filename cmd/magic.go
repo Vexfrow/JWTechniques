@@ -41,5 +41,5 @@ func init() {
 	magicCmd.Flags().StringVarP(&jwtStr, "token", "t", "", "The token that must be analyzed")
 	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "u", "", "The name of the field containing the username. If no value is given, the tool will check for \"username\" and \"user\" fields")
 	magicCmd.Flags().StringVarP(&userValue, "userValue", "v", "admin", "The name that should replaced the current username")
-	magicCmd.Flags().StringVarP(&publicKey, "publicKey", "k", "", "A public key that may be exploited for algorithm confusion attack")
+	magicCmd.Flags().StringVarP(&publicKey, "publicKey", "k", "", "A file containing a public key that may be exploited for algorithm confusion attack")
 }

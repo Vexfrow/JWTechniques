@@ -35,7 +35,13 @@ func ExploitNoneAlgo(token *jwt.Token, userHeader string, userValue string) stri
 
 }
 
-func ExploitAlgoConfusion(token *jwt.Token, userHeader string, userValue string, publicKey string) string {
+func ExploitAlgoConfusion(token *jwt.Token, userHeader string, userValue string, algorithm string, publicKey string) string {
+
+	//TODO
+	return ""
+}
+
+func ExploitPublicKeyInjection(token *jwt.Token, userHeader string, userValue string, algorithm string) string {
 
 	//TODO
 	return ""
