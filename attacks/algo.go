@@ -34,3 +34,9 @@ func ExploitNoneAlgo(token *jwt.Token, userHeader string, userValue string) stri
 	return newJWT
 
 }
+
+func ExploitAlgoConfusion(token *jwt.Token, userHeader string, userValue string, publicKey string) string {
+
+	//TODO
+	return ""
+}
