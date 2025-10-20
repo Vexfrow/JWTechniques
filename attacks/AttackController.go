@@ -64,22 +64,22 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		}
 	}
 
-	if _, ok := token.Header["jku"]; ok && url != "" {
-		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n\n")
-		newJWTStr, err := ExploitJKU(token, userHeader, userValue, url)
-		if err != nil {
-			fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
-		} else {
-			fmt.Printf("Error while trying to exploit the \"JKU injection\" attack : %s\n", err)
-		}
-		fmt.Print("------------------------------------------------------\n\n")
-	}
-
 	if _, ok := token.Header["kid"]; ok {
 		fmt.Print("Your token contains the \"KID\" header, it may be exploitable through header injection\n\n")
 		newJWTStr := ExploitKID(token)
 		if newJWTStr != "" {
 			fmt.Printf("KID header injection : %s\n", newJWTStr)
+		}
+		fmt.Print("------------------------------------------------------\n\n")
+	}
+
+	if _, ok := token.Header["jku"]; ok && url != "" {
+		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n\n")
+		newJWTStr, err := ExploitJKU(token, userHeader, userValue, url, false)
+		if err == nil {
+			fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
+		} else {
+			fmt.Printf("Error while trying to exploit the \"JKU injection\" attack : %s\n", err)
 		}
 		fmt.Print("------------------------------------------------------\n\n")
 	}

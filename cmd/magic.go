@@ -43,5 +43,5 @@ func init() {
 	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "a", "", "The name of the field containing the username. If no value is given, the tool will check for \"username\" and \"user\" fields")
 	magicCmd.Flags().StringVarP(&userValue, "userValue", "v", "admin", "The name that should replaced the current username")
 	magicCmd.Flags().StringVarP(&publicKey, "publicKey", "k", "", "A file containing a public key that may be exploited for algorithm confusion attack")
-	magicCmd.Flags().StringVarP(&publicKey, "url", "u", "", "The url of the server that will store the key for the JKU header injection ")
+	magicCmd.Flags().StringVarP(&url, "url", "u", "", "The url of the server that will store the key for the JKU header injection ")
 }

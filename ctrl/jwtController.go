@@ -6,15 +6,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func SignJWT(token *jwt.Token, secret any) string {
-	JWTString, err := token.SignedString(secret)
-
-	if err != nil {
-		fmt.Printf("Failed to sign new token: %v\n", err)
-	}
-
-	return JWTString
-}
 
 func StringToToken(jwtStr string) *jwt.Token {
 
@@ -27,14 +18,20 @@ func StringToToken(jwtStr string) *jwt.Token {
 	return token
 }
 
-func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (*jwt.Token, error) {
 
-	newJWTClaims := token.Claims
+//Change the value of the given header
+func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (*jwt.Token, error) {
 
 	//Change the value
 	if isHeader {
 		if _, ok := token.Header[header]; ok {
 			token.Header[header] = value
+
+			//If alg is modified, also modified the signing method
+			if header == "alg"{
+				signMethod := jwt.GetSigningMethod(value)
+				token.Method = signMethod
+			}
 		} else {
 			return nil, fmt.Errorf("Token has no header \"%s\"", header)
 		}
@@ -44,28 +41,13 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 
 			if _, ok := claims[header]; ok {
 				claims[header] = value
-				newJWTClaims = claims
 			} else {
 				return nil, fmt.Errorf("Token has no header \"%s\" in payload fields", header)
 			}
 		}
 	}
 
-	//Get the algo used to sign the token
-	algStr, ok := token.Header["alg"]
-	if !ok {
-		return nil, fmt.Errorf("token has no header \"alg\"")
-	}
-
-	signMethod := jwt.GetSigningMethod(algStr.(string))
-	if signMethod == nil {
-		return nil, fmt.Errorf("value \"%s\" does not correspond with any algorithm usually used", algStr.(string))
-	}
-
-	//Create a new token with the same values + the value that has been modified
-	newJWT := jwt.NewWithClaims(signMethod, newJWTClaims)
-
-	return newJWT, nil
+	return token, nil
 }
 
 func PrintToken(token *jwt.Token) {
@@ -86,4 +68,24 @@ func PrintToken(token *jwt.Token) {
 		fmt.Print("Failed to parse claims as MapClaims")
 	}
 
+}
+
+//Take a token and return a copy
+func CloneToken(token *jwt.Token) *jwt.Token{
+	tokenCpy := *token
+
+	tokenCpy.Header = make(map[string]interface{}, len(token.Header))
+	for k, v := range token.Header {
+			tokenCpy.Header[k] = v
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			newClaims := make(jwt.MapClaims, len(claims))
+			for k, v := range claims {
+				newClaims[k] = v
+			}
+			tokenCpy.Claims = newClaims
+	}
+
+	return &tokenCpy
 }

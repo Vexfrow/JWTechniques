@@ -5,33 +5,42 @@ import (
 	"crypto/rsa"
 	"fmt"
 	"strings"
+	"os"
+	"encoding/json"
 
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
 const (
-	Directory  string = "/files/"
+	Directory  string = "files/"
 	prefixFile string = "jwk-"
+	extension string = ".json"
 )
 
+
+//Generate a privateKey to sign the token, and create a JWK file to verify the signature
 func GenerateJWK(algorithm string) (any, string, error) {
 
 	var privateKey any = nil
 	var err error = nil
 	var publicKey any = nil
 
-	//Generate the private key
+	//Generate the private key according to the algorithm used
 	algLower := strings.ToLower(algorithm)
 	if strings.Contains(algLower, "rs") {
 		privateKey, publicKey, err = generateRSAKeys()
 	} else if strings.Contains(algLower, "hs") {
 		privateKey, err = generateHMACKey()
+		publicKey = privateKey
 	} else if strings.Contains(algLower, "es") {
 		privateKey, err = generateECDSAKey()
+		publicKey = privateKey
 	} else if strings.Contains(algLower, "ps") {
 		privateKey, err = generateRSAPSSKey()
+		publicKey = privateKey
 	} else if strings.Contains(algLower, "ed") {
 		privateKey, err = generateEdDSAKey()
+		publicKey = privateKey
 	} else {
 		err = fmt.Errorf("Error : Algorithm \"%s\" is unknown\n", algorithm)
 	}
@@ -40,29 +49,10 @@ func GenerateJWK(algorithm string) (any, string, error) {
 		return nil, "", err
 	}
 
-	// Set metadata
-	// (*privateKey).Set(jwk.AlgorithmKey, algorithm)
-	// (*privateKey).Set(jwk.KeyUsageKey, "sig")
+	pathToFile := prefixFile + algorithm + extension
+	err = generateFileFromKey(publicKey, algorithm, Directory + pathToFile)
 
-	// // Marshal to JSON
-	// jsonbuf, err := json.MarshalIndent(*privateKey, "", "  ")
-	// if err != nil {
-	// 	return nil, "", err
-	// }
-
-	pathToFile := Directory + prefixFile + algorithm
-
-	//Write JSON into a new file
-	//	err = os.WriteFile(pathToFile, jsonbuf, os.FileMode(os.O_CREATE))
-	if err != nil {
-		return nil, "", err
-	}
-
-	if strings.Contains(algLower, "rs") {
-		//	jwt.public
-	}
-
-	return privateKey, pathToFile, nil
+	return privateKey, pathToFile, err
 }
 
 func generateRSAKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -100,4 +90,27 @@ func generateEdDSAKey() (*jwk.Key, error) {
 	//TODO
 
 	return nil, nil
+}
+
+
+func generateFileFromKey(key any, alg, pathToFile string) error {
+	jwkKey, err := jwk.FromRaw(key)
+	if err != nil {
+		return fmt.Errorf("Failed to create JWK: %v", err)
+	}
+
+	// Set metadata
+	jwkKey.Set(jwk.AlgorithmKey, alg)
+	jwkKey.Set(jwk.KeyUsageKey, "sig")
+
+	jsonbuf, err := json.MarshalIndent(jwkKey, "", "  ")
+	if err != nil{
+		return fmt.Errorf("Failed to generate json: %v", err)
+	}
+
+	//Write JSON into a new file
+	err = os.WriteFile(pathToFile, jsonbuf, 0644)
+
+	return err
+
 }
