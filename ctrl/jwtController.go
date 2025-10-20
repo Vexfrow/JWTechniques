@@ -6,7 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func SignJWT(token *jwt.Token, secret []byte) string {
+func SignJWT(token *jwt.Token, secret any) string {
 	JWTString, err := token.SignedString(secret)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 		if _, ok := token.Header[header]; ok {
 			token.Header[header] = value
 		} else {
-			return nil, fmt.Errorf("token has no header \"%s\"", header)
+			return nil, fmt.Errorf("Token has no header \"%s\"", header)
 		}
 
 	} else {
@@ -46,7 +46,7 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 				claims[header] = value
 				newJWTClaims = claims
 			} else {
-				return nil, fmt.Errorf("token has no header \"%s\" in payload fields", header)
+				return nil, fmt.Errorf("Token has no header \"%s\" in payload fields", header)
 			}
 		}
 	}

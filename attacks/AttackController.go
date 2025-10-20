@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func MainMagic(jwtStr string, userHeader string, userValue string, publicKey string) {
+func MainMagic(jwtStr string, userHeader string, userValue string, publicKey string, url string) {
 
 	token := ctrl.StringToToken(jwtStr)
 
@@ -31,7 +31,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		}
 	}
 
-	//It should always contains the "alg" header, but we check nevertheless
+	//The token should always contains the "alg" header, but we check nevertheless
 	if alg, ok := token.Header["alg"]; ok {
 		fmt.Print("Checking if the token is vulnerable to the \"none algorithm\" attack\n\n")
 		newJWTStr := ExploitNoneAlgo(token, userHeader, userValue)
@@ -52,7 +52,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 			}
 			fmt.Print("------------------------------------------------------\n\n")
 
-			//If a file with a public key has been given, generate a token
+			//If a file with a public key is provided, generate a token that may exploit the "Algorithm confusion" vuln
 			if publicKey != "" {
 				fmt.Print("Checking if the token is vulnerable to the \"Algorithm Confusion\" attack\n\n")
 				newJWTStr := ExploitAlgoConfusion(token, userHeader, userValue, algStr, publicKey)
@@ -64,11 +64,13 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		}
 	}
 
-	if _, ok := token.Header["jku"]; ok {
+	if _, ok := token.Header["jku"]; ok && url != "" {
 		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n\n")
-		newJWTStr := ExploitJKU(token, userHeader, userValue)
-		if newJWTStr != "" {
+		newJWTStr, err := ExploitJKU(token, userHeader, userValue, url)
+		if err != nil {
 			fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
+		} else {
+			fmt.Printf("Error while trying to exploit the \"JKU injection\" attack : %s\n", err)
 		}
 		fmt.Print("------------------------------------------------------\n\n")
 	}
