@@ -3,10 +3,10 @@ package ctrl
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"fmt"
-	"strings"
-	"os"
 	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
 
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
@@ -14,11 +14,10 @@ import (
 const (
 	Directory  string = "files/"
 	prefixFile string = "jwk-"
-	extension string = ".json"
+	extension  string = ".json"
 )
 
-
-//Generate a privateKey to sign the token, and create a JWK file to verify the signature
+// Generate a privateKey to sign the token, and create a JWK file to verify the signature
 func GenerateJWK(algorithm string) (any, string, error) {
 
 	var privateKey any = nil
@@ -42,7 +41,7 @@ func GenerateJWK(algorithm string) (any, string, error) {
 		privateKey, err = generateEdDSAKey()
 		publicKey = privateKey
 	} else {
-		err = fmt.Errorf("Error : Algorithm \"%s\" is unknown\n", algorithm)
+		err = fmt.Errorf("Algorithm \"%s\" is unknown\n", algorithm)
 	}
 
 	if err != nil {
@@ -50,7 +49,7 @@ func GenerateJWK(algorithm string) (any, string, error) {
 	}
 
 	pathToFile := prefixFile + algorithm + extension
-	err = generateFileFromKey(publicKey, algorithm, Directory + pathToFile)
+	err = generateFileFromKey(publicKey, algorithm, Directory+pathToFile)
 
 	return privateKey, pathToFile, err
 }
@@ -92,7 +91,6 @@ func generateEdDSAKey() (*jwk.Key, error) {
 	return nil, nil
 }
 
-
 func generateFileFromKey(key any, alg, pathToFile string) error {
 	jwkKey, err := jwk.FromRaw(key)
 	if err != nil {
@@ -104,7 +102,7 @@ func generateFileFromKey(key any, alg, pathToFile string) error {
 	jwkKey.Set(jwk.KeyUsageKey, "sig")
 
 	jsonbuf, err := json.MarshalIndent(jwkKey, "", "  ")
-	if err != nil{
+	if err != nil {
 		return fmt.Errorf("Failed to generate json: %v", err)
 	}
 

