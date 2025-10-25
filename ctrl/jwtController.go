@@ -2,10 +2,10 @@ package ctrl
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
 
 func StringToToken(jwtStr string) *jwt.Token {
 
@@ -18,8 +18,7 @@ func StringToToken(jwtStr string) *jwt.Token {
 	return token
 }
 
-
-//Change the value of the given header
+// Change the value of the given header
 func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (*jwt.Token, error) {
 
 	//Change the value
@@ -28,7 +27,7 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 			token.Header[header] = value
 
 			//If alg is modified, also modified the signing method
-			if header == "alg"{
+			if header == "alg" {
 				signMethod := jwt.GetSigningMethod(value)
 				token.Method = signMethod
 			}
@@ -70,21 +69,18 @@ func PrintToken(token *jwt.Token) {
 
 }
 
-//Take a token and return a copy
-func CloneToken(token *jwt.Token) *jwt.Token{
+// Take a token and return a copy
+func CloneToken(token *jwt.Token) *jwt.Token {
 	tokenCpy := *token
 
-	tokenCpy.Header = make(map[string]interface{}, len(token.Header))
-	for k, v := range token.Header {
-			tokenCpy.Header[k] = v
-	}
+	tokenCpy.Header = make(map[string]any, len(token.Header))
+
+	maps.Copy(tokenCpy.Header, token.Header)
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			newClaims := make(jwt.MapClaims, len(claims))
-			for k, v := range claims {
-				newClaims[k] = v
-			}
-			tokenCpy.Claims = newClaims
+		newClaims := make(jwt.MapClaims, len(claims))
+		maps.Copy(newClaims, claims)
+		tokenCpy.Claims = newClaims
 	}
 
 	return &tokenCpy
