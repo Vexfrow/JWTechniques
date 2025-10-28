@@ -52,17 +52,16 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 	return newJWT, nil
 }
 
-
-func ExploitJKU(token *jwt.Token, userHeader, userValue, url string, server bool) (string, error){
+func ExploitJKU(token *jwt.Token, userHeader, userValue, url string, server bool) (string, error) {
 
 	newJWT, err := generateJkuToken(token, userHeader, userValue, url)
-	if err != nil{
+	if err != nil {
 		return "", err
 	}
 
 	fmt.Printf("JKU header injection  : %s\n\n", newJWT)
 
-	if server{
+	if server {
 		launchServer(12345)
 	}
 

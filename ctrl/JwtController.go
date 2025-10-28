@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// Transform a jwt string into a jwt object
 func StringToToken(jwtStr string) *jwt.Token {
 
 	token, _, err := new(jwt.Parser).ParseUnverified(jwtStr, jwt.MapClaims{})
@@ -49,6 +50,7 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 	return token, nil
 }
 
+// Print every headers and claims of a token
 func PrintToken(token *jwt.Token) {
 
 	// Extract headers
@@ -69,7 +71,7 @@ func PrintToken(token *jwt.Token) {
 
 }
 
-// Take a token and return a copy
+// Take a token object and return an exact copy
 func CloneToken(token *jwt.Token) *jwt.Token {
 	tokenCpy := *token
 

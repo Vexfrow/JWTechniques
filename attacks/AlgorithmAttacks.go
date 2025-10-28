@@ -45,6 +45,13 @@ func ExploitAlgoConfusion(token *jwt.Token, userHeader string, userValue string,
 
 func ExploitPublicKeyInjection(token *jwt.Token, userHeader string, userValue string, algorithm string) string {
 
+	cpyToken := ctrl.CloneToken(token)
+	cpyToken, err := ctrl.ChangeValue(cpyToken, "alg", "none", true)
+
+	if err != nil {
+		fmt.Printf("An error ocurred while modifying the value of the \"alg\" header : %v \n", err)
+		return ""
+	}
 	//TODO
 	return ""
 }
