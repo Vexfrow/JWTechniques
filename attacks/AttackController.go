@@ -45,7 +45,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 
 		//Check if the algo used is an asymmetric algorithm, which can possibly lead to "Algorithm Confusion" and "Public Key Header Injection" attacks
 		algStr := strings.ToLower(alg.(string))
-		if !strings.Contains(algStr, "hs") {
+		if algStr[0:2] != "hs" {
 			fmt.Print("Checking if the token is vulnerable to the \"Public Key Header Injection\" attack\n\n")
 			newJWTStr = ExploitPublicKeyInjection(token, userHeader, userValue, algStr)
 			if newJWTStr != "" {
