@@ -8,11 +8,9 @@ import (
 )
 
 var (
-	jwtStr     string
-	userHeader string
-	userValue  string
-	publicKey  string
-	url        string
+	jwtStr    string
+	publicKey string
+	url       string
 )
 
 // magicCmd represents the magic command
@@ -28,7 +26,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if jwtStr != "" {
-			attacks.MainMagic(jwtStr, userHeader, userValue, publicKey, url)
+			attacks.MainMagic(jwtStr, publicKey, url)
 		} else {
 			fmt.Print("A token must be given with the \"--token\" (or\"-t\") flag")
 		}
@@ -40,8 +38,8 @@ func init() {
 	rootCmd.AddCommand(magicCmd)
 
 	magicCmd.Flags().StringVarP(&jwtStr, "token", "t", "", "The token that must be analyzed")
-	magicCmd.Flags().StringVarP(&userHeader, "userHeader", "a", "", "The name of the field containing the username. If no value is given, the tool will check for \"username\" and \"user\" fields")
-	magicCmd.Flags().StringVarP(&userValue, "userValue", "v", "admin", "The name that should replaced the current username")
+	magicCmd.Flags().StringVarP(&attacks.UserHeader, "userHeader", "a", "", "The name of the field containing the username. If no value is given, the tool will check for \"username\" and \"user\" fields")
+	magicCmd.Flags().StringVarP(&attacks.UserValue, "userValue", "v", "admin", "The name that should replaced the current username")
 	magicCmd.Flags().StringVarP(&publicKey, "publicKey", "k", "", "A file containing a public key that may be exploited for algorithm confusion attack")
 	magicCmd.Flags().StringVarP(&url, "url", "u", "", "The url of the server that will store the key for the JKU header injection ")
 }

