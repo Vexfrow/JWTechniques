@@ -33,7 +33,6 @@ Take a JWT, parse it and gives several proposition on how to exploit it.
 - Factorize code
 - Implement attacks
   - Algo confusion
-  - Public key in header
   - KID injection
 - Maybe :
   - Implement way to recover public key from tokens (see JWT-Key-Recovery)

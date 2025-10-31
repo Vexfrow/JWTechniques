@@ -3,6 +3,9 @@ package cmd
 import (
 	"JWTechniques/attacks"
 	"fmt"
+	"os"
+
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 )
@@ -14,24 +17,43 @@ var (
 )
 
 // magicCmd represents the magic command
-// Todo : Change description
 var magicCmd = &cobra.Command{
 	Use:   "magic",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Generate several JWT that may exploit vulnerabilities, from a single JWT",
+	Long:  ``,
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if jwtStr != "" {
 			attacks.MainMagic(jwtStr, publicKey, url)
 		} else {
-			fmt.Print("A token must be given with the \"--token\" (or\"-t\") flag")
+			fmt.Print("A token must be provided with the \"--token\" (or\"-t\") flag\n")
 		}
 
 	},
+}
+
+func PrintHelp() {
+	fmt.Print(`
+Magic takes a JWT, analyze it and then craft several admin-privileged tokens that may exploit potential vulnerabilities on remote server.
+
+The vulnerabilities tested are:
+		- The None algorithm attack
+		- The public key header injection
+		- The JKU header injection
+		- The KID header injection
+		- The algorithm confusion attack
+
+In some cases, some flags are needed :
+`)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "--token\t-t\tMandatory\tThe original JWT")
+	fmt.Fprintln(w, "--userHeader\t-a\tOptional\tThe header that must be modified to become admin")
+	fmt.Fprintln(w, "--userValue\t-v\tOptional\tThe value that must be used to become admin")
+	fmt.Fprintln(w, "--publicKey\t-k\tMandatory only for algorithm confusion attack\tA file containing the public key used to validate the token signature")
+	fmt.Fprintln(w, "--url\t-u\tMandatory only for JKU header injection\tThe URL linking to the server hosting the file")
+
+	w.Flush()
+
 }
 
 func init() {

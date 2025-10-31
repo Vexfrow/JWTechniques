@@ -59,7 +59,6 @@ func GenerateKeys(algorithm string) (any, any, error) {
 
 	//Generate the private key according to the algorithm used
 	alg := strings.ToLower(algorithm)[0:2]
-	fmt.Printf("algo = %s / %s\n", algorithm, alg)
 	switch alg {
 	case "rs":
 		privateKey, publicKey, err = GenerateRSAKeys()
