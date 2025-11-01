@@ -68,16 +68,10 @@ func GenerateKeys(algorithm string) (any, any, error) {
 		publicKey = privateKey
 
 	case "es":
-		privateKey, err = GenerateECDSAKey()
-		publicKey = privateKey
+		privateKey, publicKey, err = GenerateECDSAKeys()
 
 	case "ps":
-		privateKey, err = GenerateRSAPSSKey()
-		publicKey = privateKey
-
-	case "ed":
-		privateKey, err = GenerateEdDSAKey()
-		publicKey = privateKey
+		privateKey, publicKey, err = GenerateRSAPSSKeys()
 
 	default:
 		err = fmt.Errorf("Algorithm \"%s\" is unknown\n", algorithm)
@@ -105,20 +99,14 @@ func GenerateHMACKey() (any, error) {
 	return nil, nil
 }
 
-func GenerateECDSAKey() (any, error) {
+func GenerateECDSAKeys() (any, any, error) {
 	//TODO
 
-	return nil, nil
+	return nil, nil, nil
 }
 
-func GenerateRSAPSSKey() (any, error) {
+func GenerateRSAPSSKeys() (any, any, error) {
 	//TODO
 
-	return nil, nil
-}
-
-func GenerateEdDSAKey() (any, error) {
-	//TODO
-
-	return nil, nil
+	return nil, nil, nil
 }

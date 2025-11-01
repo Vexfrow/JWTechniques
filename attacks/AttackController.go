@@ -44,7 +44,7 @@ func MainMagic(jwtStr string, publicKey string, url string) {
 			fmt.Print("Checking if the token is vulnerable to the \"Public Key Header Injection\" attack\n\n")
 			newJWTStr = ExploitPublicKeyInjection(token, algStr)
 			if newJWTStr != "" {
-				fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
+				fmt.Printf("Public Key Header Injection : %s\n\n", newJWTStr)
 			}
 			fmt.Print("------------------------------------------------------\n\n")
 
