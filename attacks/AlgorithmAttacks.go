@@ -57,11 +57,10 @@ func ExploitNoneAlgo(token *jwt.Token) string {
 // - Sign the token with the public key
 
 // Token is a valid JWT
-// algorithm is the algorithm that will replace the original one
 // publicKey is the path to a file containing a valid public key ()
 
 // Return the newly created token
-func ExploitAlgoConfusion(token *jwt.Token, algorithm string, publicKeyFile string) string {
+func ExploitAlgoConfusion(token *jwt.Token, publicKeyFile string) string {
 
 	cpyToken := ctrl.CloneToken(token)
 

@@ -3,6 +3,7 @@ package ctrl
 import (
 	"fmt"
 	"maps"
+	"reflect"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -20,7 +21,7 @@ func StringToToken(jwtStr string) *jwt.Token {
 }
 
 // Change the value of the given header
-func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (*jwt.Token, error) {
+func ChangeValue(token *jwt.Token, header string, value any, isHeader bool) (*jwt.Token, error) {
 
 	//Change the value
 	if isHeader {
@@ -28,12 +29,13 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 			token.Header[header] = value
 
 			//If alg is modified, also modified the signing method
-			if header == "alg" {
-				signMethod := jwt.GetSigningMethod(value)
+			if header == "alg" && reflect.TypeOf(value).String() == "string" {
+				alg := value.(string)
+				signMethod := jwt.GetSigningMethod(alg)
 				token.Method = signMethod
 			}
 		} else {
-			return nil, fmt.Errorf("Token has no header \"%s\"", header)
+			return token, fmt.Errorf("Token has no header \"%s\"", header)
 		}
 
 	} else {
@@ -42,7 +44,7 @@ func ChangeValue(token *jwt.Token, header string, value string, isHeader bool) (
 			if _, ok := claims[header]; ok {
 				claims[header] = value
 			} else {
-				return nil, fmt.Errorf("Token has no header \"%s\" in payload fields", header)
+				return token, fmt.Errorf("Token has no header \"%s\" in payload fields", header)
 			}
 		}
 	}

