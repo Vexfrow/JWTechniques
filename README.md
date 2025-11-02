@@ -27,12 +27,10 @@ Take a JWT, parse it and gives several proposition on how to exploit it.
 
 # RoadMap
 
-- Add others ways to detect the "user" header and how to modify it properly
 - Generate all kind of priv/public keys
 - Add command for each attacks
 - Factorize code
 - Implement attacks
-  - Algo confusion
   - KID injection
 - Maybe :
   - Implement way to recover public key from tokens (see JWT-Key-Recovery)

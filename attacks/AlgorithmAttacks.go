@@ -57,7 +57,7 @@ func ExploitNoneAlgo(token *jwt.Token) string {
 // - Sign the token with the public key
 
 // Token is a valid JWT
-// publicKey is the path to a file containing a valid public key ()
+// publicKey is the path to a file containing a valid public key
 
 // Return the newly created token
 func ExploitAlgoConfusion(token *jwt.Token, publicKeyFile string) string {
@@ -100,7 +100,7 @@ func ExploitAlgoConfusion(token *jwt.Token, publicKeyFile string) string {
 // The process is the following :
 // - Create a copy of the token,
 // - Generate new public/private keys
-// - Add a "JWK" header, which correspond to the public key, to the token
+// - Add a "JWK" header to the token, its value correspond to the public key
 // - If possible : Change the "user" payload to elevate our privileges
 // - Sign the token with the private key
 
